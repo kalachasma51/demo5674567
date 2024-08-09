@@ -43,14 +43,16 @@
         }
     </style>
 </head>
-<body>
-   <div class="centered-text" onclick="playAudio()"> Chaddi GopaL </div>
-    <audio id="myAudio">
-        <source src="reel.mp3" type="audio/mpeg"> 
+<body onclick="playAudio()">
+    <div class="centered-text">KISHAN</div>
+    <audio id="myAudio" controls style="display:none;">
+       <source src="reel.mp3" type="audio/mpeg"> 
+        <track src="subtitles.vtt" kind="subtitles" srclang="en" label="English" default>
         Your browser does not support the audio element.
     </audio>
-  <canvas id="canvas"></canvas>
-
+    <canvas id="canvas"></canvas>
+      
+ 
     <script>
         const audio = document.getElementById("myAudio");
         const canvas = document.getElementById("canvas");
