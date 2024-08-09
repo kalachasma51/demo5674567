@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Chaddi Gopal</title>
+    <title>Chaddi Gopal</title>
     <style>
         body, html {
             height: 100%;
@@ -11,8 +11,9 @@
             display: flex; 
             justify-content: center; 
             align-items: center;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4  99%, #fad0c4 100%);
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
             font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Prevents scrolling */
         }
          
         canvas {
@@ -30,6 +31,8 @@
             color: #ffffff;
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
             animation: fadeInOut 5s infinite, neonGlow 1.5s infinite alternate;
+            z-index: 2; /* Ensure the text is above the canvas */
+            position: relative;
         }
 
         @keyframes fadeInOut {
@@ -43,7 +46,7 @@
         }
     </style>
 </head>
-<body onclick="playAudio()">
+<body>
     <div class="centered-text">ChaddI GopaL</div>
     <audio id="myAudio" controls style="display:none;">
        <source src="reel.mp3" type="audio/mpeg"> 
@@ -52,7 +55,6 @@
     </audio>
     <canvas id="canvas"></canvas>
       
- 
     <script>
         const audio = document.getElementById("myAudio");
         const canvas = document.getElementById("canvas");
@@ -68,6 +70,14 @@
         analyser.fftSize = 256;
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
         function draw() {
             requestAnimationFrame(draw);
@@ -93,8 +103,8 @@
                 x += barWidth + 1;
             }
 
-            // Change background color based on frequency data
-            const avg = dataArray.reduce((a, b) => a + b) / bufferLength;
+            // Change background color based on average frequency data
+            const avg = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
             const color = `rgb(${avg}, ${avg / 2}, ${255 - avg})`;
             document.body.style.backgroundColor = color;
         }
@@ -103,10 +113,11 @@
 
         function playAudio() {
             audioCtx.resume().then(() => {
-                audio.play();
+                if (audio.paused) {
+                    audio.play();
+                }
             });
         }
     </script>
 </body>
 </html>
-
