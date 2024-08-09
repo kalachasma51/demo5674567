@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" onclick="playAudio()"> 
+<html lang="en"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,12 +46,11 @@
         }
     </style>
 </head>
-<body>
+<body onclick="playAudio()">
     <div class="centered-text">ChaddI GopaL</div>
-    <audio id="myAudio" controls style="display:none;">
+    <audio id="myAudio" style="display:none;">
        <source src="reel.mp3" type="audio/mpeg"> 
-        <track src="subtitles.vtt" kind="subtitles" srclang="en" label="English" default>
-        Your browser does not support the audio element.
+       Your browser does not support the audio element.
     </audio>
     <canvas id="canvas"></canvas>
       
@@ -60,16 +59,24 @@
         const canvas = document.getElementById("canvas");
         const canvasCtx = canvas.getContext("2d");
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaElementSource(audio);
+        let audioCtx;
+        let analyser;
+        let source;
+        let bufferLength;
+        let dataArray;
 
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
+        function setupAudioContext() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            source = audioCtx.createMediaElementSource(audio);
 
-        analyser.fftSize = 256;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            analyser.fftSize = 256;
+            bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+        }
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -102,20 +109,15 @@
 
                 x += barWidth + 1;
             }
-
-            // Change background color based on average frequency data
-            const avg = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
-            const color = `rgb(${avg}, ${avg / 2}, ${255 - avg})`;
-            document.body.style.backgroundColor = color;
         }
 
-        draw();
-
         function playAudio() {
+            if (!audioCtx) {
+                setupAudioContext();
+                draw();
+            }
             audioCtx.resume().then(() => {
-                if (audio.paused) {
-                    audio.play();
-                }
+                audio.play();
             });
         }
     </script>
