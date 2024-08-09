@@ -40,12 +40,63 @@
         <source src="reel.mp3" type="audio/mpeg"> 
         Your browser does not support the audio element.
     </audio>
+  <canvas id="canvas"></canvas>
 
     <script>
+        const audio = document.getElementById("myAudio");
+        const canvas = document.getElementById("canvas");
+        const canvasCtx = canvas.getContext("2d");
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioCtx.createAnalyser();
+        const source = audioCtx.createMediaElementSource(audio);
+
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function draw() {
+            requestAnimationFrame(draw);
+
+            analyser.getByteFrequencyData(dataArray);
+
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = (canvas.width / bufferLength) * 2.5;
+            let barHeight;
+            let x = 0;
+
+            for(let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i];
+
+                const r = barHeight + 25 * (i / bufferLength);
+                const g = 250 * (i / bufferLength);
+                const b = 50;
+
+                canvasCtx.fillStyle = `rgb(${r},${g},${b})`;
+                canvasCtx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
+
+                x += barWidth + 1;
+            }
+
+            // Change background color based on frequency data
+            const avg = dataArray.reduce((a, b) => a + b) / bufferLength;
+            const color = `rgb(${avg}, ${avg / 2}, ${255 - avg})`;
+            document.body.style.backgroundColor = color;
+        }
+
+        draw();
+
         function playAudio() {
-            var audio = document.getElementById("myAudio");
-            audio.play();
+            audioCtx.resume().then(() => {
+                audio.play();
+            });
         }
     </script>
+</body>
+</html>
 </body>
 </html>
